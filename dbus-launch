@@ -1,0 +1,24 @@
+#!/bin/sh
+
+# Abdelhak Bougouffa (c) 2019, MIT Licence
+# This script is an alternative to the `dbus-launch` command found in X11 D-Bus package
+# It starts a D-Bus daemon and prints the variables DBUS_SESSION_BUS_{ADDRESS, PID}
+
+TMP_DBUS="/tmp/dbus-daemon_pid_$(date +'%s')"
+
+IMAGE_BASE_DIR="/opt/image_x86"
+IMAGE_DIR="${IMAGE_BASE_DIR}/usr/local"
+BIN_DIR="$IMAGE_DIR/bin"
+LIB_DIR="$IMAGE_DIR/lib"
+
+export LD_LIBRARY_PATH=$LIB_DIR
+
+$BIN_DIR/dbus-daemon --config-file=$IMAGE_DIR/share/dbus-1/session.conf --print-pid=1 --print-address=1 > $TMP_DBUS &
+
+sleep 4s
+sync $TMP_DBUS
+
+sed '1s/^/DBUS_SESSION_BUS_ADDRESS=/' $TMP_DBUS | sed '2s/^/DBUS_SESSION_BUS_PID=/'
+rm $TMP_DBUS
+
+exit 0
